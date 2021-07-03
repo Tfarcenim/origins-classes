@@ -2,24 +2,24 @@ package io.github.apace100.originsclasses.mixin;
 
 import io.github.apace100.originsclasses.networking.ModPacketsS2C;
 import io.github.apace100.originsclasses.power.ClassPowerTypes;
+import net.minecraft.entity.NPCMerchant;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.village.SimpleMerchant;
-import net.minecraft.village.TradeOffer;
+import net.minecraft.item.MerchantOffer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(SimpleMerchant.class)
+@Mixin(NPCMerchant.class)
 public class SimpleMerchantMixin {
 
-    @Shadow @Final private PlayerEntity player;
+    @Shadow @Final private PlayerEntity customer;
 
-    @Redirect(method = "trade", at = @At(value = "INVOKE", target = "Lnet/minecraft/village/TradeOffer;use()V"))
-    private void preventUseClientSide(TradeOffer tradeOffer) {
-        if(ModPacketsS2C.isWanderingTrader || !ClassPowerTypes.TRADE_AVAILABILITY.isActive(player)) {
-            tradeOffer.use();
+    @Redirect(method = "onTrade", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/MerchantOffer;increaseUses()V"))
+    private void preventUseClientSide(MerchantOffer tradeOffer) {
+        if(ModPacketsS2C.isWanderingTrader || !ClassPowerTypes.TRADE_AVAILABILITY.isActive(customer)) {
+            tradeOffer.increaseUses();
         }
     }
 }

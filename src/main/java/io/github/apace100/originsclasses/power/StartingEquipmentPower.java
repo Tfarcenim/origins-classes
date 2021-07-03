@@ -3,7 +3,6 @@ package io.github.apace100.originsclasses.power;
 import io.github.apace100.origins.power.Power;
 import io.github.apace100.origins.power.PowerType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 
 import java.util.HashMap;
@@ -31,15 +30,15 @@ public class StartingEquipmentPower extends Power {
     public void onChosen(boolean isOrbOfOrigin) {
         if(!isOrbOfOrigin) {
             slottedStacks.forEach((slot, stack) -> {
-                if(player.inventory.getStack(slot).isEmpty()) {
-                    player.inventory.setStack(slot, stack);
+                if(player.inventory.getStackInSlot(slot).isEmpty()) {
+                    player.inventory.setInventorySlotContents(slot, stack);
                 } else {
-                    player.giveItemStack(stack);
+                    player.addItemStackToInventory(stack);
                 }
             });
             itemStacks.forEach(is -> {
                 ItemStack copy = is.copy();
-                player.giveItemStack(copy);
+                player.addItemStackToInventory(copy);
             });
         }
     }

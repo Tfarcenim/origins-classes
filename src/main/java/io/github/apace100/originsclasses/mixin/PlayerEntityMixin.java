@@ -6,15 +6,12 @@ import io.github.apace100.originsclasses.power.ClassPowerTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.screen.PlayerScreenHandler;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -24,23 +21,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
 
-    @Shadow @Final public PlayerScreenHandler playerScreenHandler;
-
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
 
-    @Redirect(method = "increaseTravelMotionStats", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;addExhaustion(F)V", ordinal = 3))
+    @Redirect(method = "addMovementStat", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;addExhaustion(F)V", ordinal = 3))
     private void removeSprintingExhaustion(PlayerEntity playerEntity, float exhaustion) {
         if(!ClassPowerTypes.NO_SPRINT_EXHAUSTION.isActive(playerEntity)) {
             playerEntity.addExhaustion(exhaustion);
         }
     }
 
-    @ModifyVariable(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getAttackCooldownProgress(F)F"), ordinal = 0)
+    @ModifyVariable(method = "attackTargetEntityWithCurrentItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getCooledAttackStrength(F)F"), ordinal = 0)
     private float modifyBaseAttackDamageInStealth(float originalAttackDamage, Entity target) {
         float modifiedDamage = originalAttackDamage;
-        boolean isInStealth = this.hasStatusEffect(StealthEffect.INSTANCE);
+        boolean isInStealth = this.isPotionActive(StealthEffect.INSTANCE);
         if(target != null && isInStealth) {
             float yawTarget = target.getYaw(1F);
             while(yawTarget < 0F) yawTarget += 360F;
@@ -58,7 +53,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             stealthCounter.setValue(stealthCounter.getMin());
         }
         if(isInStealth) {
-            this.removeStatusEffect(StealthEffect.INSTANCE);
+            this.removePotionEffect(StealthEffect.INSTANCE);
         }
         return modifiedDamage;
     }
@@ -69,29 +64,29 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             VariableIntPower stealthCounter = ClassPowerTypes.STEALTH.get(this);
             if(this.isSneaking()) {
                 if(stealthCounter.increment() == stealthCounter.getMax()) {
-                    if(!this.hasStatusEffect(StealthEffect.INSTANCE)) {
-                        this.addStatusEffect(new StatusEffectInstance(StealthEffect.INSTANCE, 33000, 0, false, false, true));
+                    if(!this.isPotionActive(StealthEffect.INSTANCE)) {
+                        this.addPotionEffect(new EffectInstance(StealthEffect.INSTANCE, 33000, 0, false, false, true));
                     }
                 }
             } else {
                 stealthCounter.setValue(stealthCounter.getMin());
-                if(this.hasStatusEffect(StealthEffect.INSTANCE)) {
-                    this.removeStatusEffect(StealthEffect.INSTANCE);
+                if(this.isPotionActive(StealthEffect.INSTANCE)) {
+                    this.removePotionEffect(StealthEffect.INSTANCE);
                 }
             }
         }
     }
 
-    @Inject(method = "playSound(Lnet/minecraft/sound/SoundEvent;FF)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "playSound(Lnet/minecraft/util/SoundEvent;FF)V", at = @At("HEAD"), cancellable = true)
     private void muffleSoundsInStealth(SoundEvent sound, float volume, float pitch, CallbackInfo ci) {
-        if(this.hasStatusEffect(StealthEffect.INSTANCE)) {
+        if(this.isPotionActive(StealthEffect.INSTANCE)) {
             ci.cancel();
         }
     }
 
-    @Redirect(method = "eatFood", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/sound/SoundEvent;Lnet/minecraft/sound/SoundCategory;FF)V"))
+    @Redirect(method = "onFoodEaten", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"))
     private void muffleEatingFinishSound(World world, PlayerEntity player, double x, double y, double z, SoundEvent sound, SoundCategory category, float volume, float pitch) {
-        if(!this.hasStatusEffect(StealthEffect.INSTANCE)) {
+        if(!this.isPotionActive(StealthEffect.INSTANCE)) {
             world.playSound(player, x, y, z, sound, category, volume, pitch);
         }
     }

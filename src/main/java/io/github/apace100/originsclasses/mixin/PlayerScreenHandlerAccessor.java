@@ -1,14 +1,13 @@
 package io.github.apace100.originsclasses.mixin;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.screen.CraftingScreenHandler;
-import net.minecraft.screen.PlayerScreenHandler;
+import net.minecraft.inventory.container.PlayerContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(PlayerScreenHandler.class)
+@Mixin(PlayerContainer.class)
 public interface PlayerScreenHandlerAccessor {
 
     @Accessor
-    PlayerEntity getOwner();
+    PlayerEntity getPlayer();
 }

@@ -1,8 +1,8 @@
 package io.github.apace100.originsclasses.mixin;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.text.Text;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,12 +14,12 @@ public abstract class ItemStackMixin {
 	
 	@Shadow public abstract boolean hasTag();
 	
-	@Shadow public abstract CompoundTag getTag();
+	@Shadow public abstract CompoundNBT getTag();
 	
-	@Inject(method = "getName", at = @At(value = "INVOKE", shift = At.Shift.BEFORE, target = "Lnet/minecraft/item/ItemStack;getItem()Lnet/minecraft/item/Item;"), cancellable = true)
-	private void getExtendedName(CallbackInfoReturnable<Text> cir) {
+	@Inject(method = "getDisplayName", at = @At(value = "INVOKE", shift = At.Shift.BEFORE, target = "Lnet/minecraft/item/ItemStack;getItem()Lnet/minecraft/item/Item;"), cancellable = true)
+	private void getExtendedName(CallbackInfoReturnable<ITextComponent> cir) {
 		if (hasTag() && getTag().contains("OriginalName")) {
-			cir.setReturnValue(Text.Serializer.fromJson(getTag().getString("OriginalName")));
+			cir.setReturnValue(ITextComponent.Serializer.getComponentFromJson(getTag().getString("OriginalName")));
 		}
 	}
 }

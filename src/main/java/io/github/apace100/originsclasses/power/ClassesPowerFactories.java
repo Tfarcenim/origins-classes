@@ -1,27 +1,19 @@
 package io.github.apace100.originsclasses.power;
 
-import io.github.apace100.origins.Origins;
-import io.github.apace100.origins.power.DamageOverTimePower;
-import io.github.apace100.origins.power.PowerType;
 import io.github.apace100.origins.power.VariableIntPower;
 import io.github.apace100.origins.power.factory.PowerFactory;
 import io.github.apace100.origins.power.factory.condition.ConditionFactory;
-import io.github.apace100.origins.registry.ModDamageSources;
 import io.github.apace100.origins.registry.ModRegistries;
 import io.github.apace100.origins.util.SerializableData;
 import io.github.apace100.origins.util.SerializableDataType;
 import io.github.apace100.originsclasses.OriginsClasses;
-import io.github.apace100.originsclasses.data.ClassesDataTypes;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LeavesBlock;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tag.BlockTags;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
@@ -31,7 +23,7 @@ public class ClassesPowerFactories {
 
     @SuppressWarnings("unchecked")
     public static void register() {
-        register(new PowerFactory<>(new Identifier(OriginsClasses.MODID, "craft_amount"),
+        register(new PowerFactory<>(new ResourceLocation(OriginsClasses.MODID, "craft_amount"),
             new SerializableData()
                 .add("item_condition", SerializableDataType.ITEM_CONDITION, null)
                 .add("modifier", SerializableDataType.ATTRIBUTE_MODIFIER, null)
@@ -44,12 +36,12 @@ public class ClassesPowerFactories {
                         power.addModifier(data.getModifier("modifier"));
                     }
                     if(data.isPresent("modifiers")) {
-                        ((List<EntityAttributeModifier>)data.get("modifiers"))
+                        ((List<AttributeModifier>)data.get("modifiers"))
                             .forEach(power::addModifier);
                     }
                     return power;
                 }));
-        register(new PowerFactory<>(new Identifier(OriginsClasses.MODID, "lumberjack"),
+        register(new PowerFactory<>(new ResourceLocation(OriginsClasses.MODID, "lumberjack"),
             new SerializableData(),
             data ->
                 (type, player) -> new MultiMinePower(type, player, (pl, bs, bp) -> {
@@ -57,19 +49,19 @@ public class ClassesPowerFactories {
                         Queue<BlockPos> queue = new LinkedList<>();
                         queue.add(bp);
                         boolean foundOneWithLeaves = false;
-                        BlockPos.Mutable pos = bp.mutableCopy();
-                        BlockPos.Mutable newPos = bp.mutableCopy();
+                        BlockPos.Mutable pos = bp.toMutable();
+                        BlockPos.Mutable newPos = bp.toMutable();
                         while(!queue.isEmpty()) {
-                            pos.set(queue.remove());
+                            pos.setPos(queue.remove());
                             for(int dx = -1; dx <= 1; dx++) {
                                 for(int dy = 0; dy <= 1; dy++) {
                                     for(int dz = -1; dz <= 1; dz++) {
                                         if(dx == 0 & dy == 0 && dz == 0) {
                                             continue;
                                         }
-                                        newPos.set(pos.getX() + dx, pos.getY() + dy, pos.getZ() + dz);
+                                        newPos.setPos(pos.getX() + dx, pos.getY() + dy, pos.getZ() + dz);
                                         BlockState state = pl.world.getBlockState(newPos);
-                                        if(state.isOf(bs.getBlock()) && !affected.contains(newPos)) {
+                                        if(state.matchesBlock(bs.getBlock()) && !affected.contains(newPos)) {
                                             BlockPos savedNewPos = newPos.toImmutable();
                                             affected.add(savedNewPos);
                                             queue.add(savedNewPos);
@@ -91,9 +83,9 @@ public class ClassesPowerFactories {
                             affected.clear();
                         }
                         return new ArrayList<>(affected);
-                    }, state -> state.getBlock().isIn(BlockTags.LOGS)).addCondition(p -> p.getMainHandStack().getItem() instanceof AxeItem)
+                    }, state -> state.getBlock().isIn(BlockTags.LOGS)).addCondition(p -> p.getHeldItemMainhand().getItem() instanceof AxeItem)
                 ));
-        register(new PowerFactory<>(new Identifier(OriginsClasses.MODID, "variable_int"),
+        register(new PowerFactory<>(new ResourceLocation(OriginsClasses.MODID, "variable_int"),
             new SerializableData()
                 .add("start_value", SerializableDataType.INT, null)
                 .add("min", SerializableDataType.INT, Integer.MIN_VALUE)

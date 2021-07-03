@@ -4,27 +4,23 @@ import io.github.apace100.originsclasses.OriginsClasses;
 import io.github.apace100.originsclasses.power.ClassPowerTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
+import net.minecraft.inventory.container.EnchantmentContainer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.EnchantmentScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(EnchantmentScreenHandler.class)
+@Mixin(EnchantmentContainer.class)
 public class EnchantmentScreenHandlerMixin {
 
     private PlayerEntity enchanter;
 
-    @Inject(method = "<init>(ILnet/minecraft/entity/player/PlayerInventory;Lnet/minecraft/screen/ScreenHandlerContext;)V", at = @At("TAIL"))
-    private void saveEnchanterInHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, CallbackInfo ci) {
+    @Inject(method = "<init>(ILnet/minecraft/entity/player/PlayerInventory;Lnet/minecraft/util/IWorldPosCallable;)V", at = @At("TAIL"))
+    private void saveEnchanterInHandler(int syncId, PlayerInventory playerInventory, IWorldPosCallable context, CallbackInfo ci) {
         this.enchanter = playerInventory.player;
     }
 

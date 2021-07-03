@@ -1,13 +1,13 @@
 package io.github.apace100.originsclasses.effect;
 
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectType;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectType;
 
-public class StealthEffect extends StatusEffect {
+public class StealthEffect extends Effect {
 
-    public static final StatusEffect INSTANCE = new StealthEffect(StatusEffectType.BENEFICIAL, 0x242424);
+    public static final Effect INSTANCE = new StealthEffect(EffectType.BENEFICIAL, 0x242424);
 
-    protected StealthEffect(StatusEffectType type, int color) {
+    protected StealthEffect(EffectType type, int color) {
         super(type, color);
     }
 

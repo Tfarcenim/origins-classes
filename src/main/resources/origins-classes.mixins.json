@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "io.github.apace100.originsclasses.mixin",
   "compatibilityLevel": "JAVA_8",
+  "refmap": "origins-classes.refmap.json",
   "mixins": [
     "ProjectileEntityMixin",
     "TameableEntityMixin",
@@ -13,15 +14,11 @@
     "VillagerEntityMixin",
     "HungerManagerMixin",
     "DontOverwriteAttrModsMixin",
-    "MiningToolItemMixin",
-    "PickaxeItemMixin",
-    "AxeItemMixin",
     "RepairItemRecipeMixin",
     "CraftingScreenHandlerAccessor",
     "CraftingInventoryAccessor",
     "PlayerScreenHandlerAccessor",
     "AnvilScreenHandlerMixin",
-    "PotionItemMixin",
     "PlayerEntityMixin",
     "ServerWorldMixin",
     "EnchantmentHelperMixin",
@@ -37,7 +34,6 @@
   ],
   "client": [
     "ClientPlayerEntityMixin",
-    "ItemMixin",
     "SimpleMerchantMixin",
     "WorldRendererMixin",
     "EntityRendererMixin"

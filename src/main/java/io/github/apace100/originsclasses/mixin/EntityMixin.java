@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Entity.class)
 public class EntityMixin {
 
-    @Inject(method = "isSneaky", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "isSneaking", at = @At("HEAD"), cancellable = true)
     private void modifySneakyState(CallbackInfoReturnable<Boolean> cir) {
         if(ClassPowerTypes.SNEAKY.isActive((Entity)(Object)this)) {
             cir.setReturnValue(true);
